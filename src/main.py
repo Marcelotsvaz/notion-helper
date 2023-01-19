@@ -20,6 +20,10 @@ def main( event, context ):
 	logging.getLogger().setLevel( logging.INFO )
 	
 	
+	# Variables.
+	localTimezone = ZoneInfo( 'America/Sao_Paulo' )
+	
+	
 	# Get Notion client.
 	notion = Client( auth = os.environ['notionToken'] )
 	
@@ -32,7 +36,7 @@ def main( event, context ):
 	
 	
 	# Get today's tasks.
-	dayEnd = datetime.now( ZoneInfo( 'America/Sao_Paulo' ) ).replace( hour = 23, minute = 59, second = 59, microsecond = 0 )
+	dayEnd = datetime.now( localTimezone ).replace( hour = 23, minute = 59, second = 59, microsecond = 0 )
 	tasks = notion.databases.query(
 		database_id = databaseId,
 		filter = {
@@ -55,7 +59,7 @@ def main( event, context ):
 		taskName = ''.join( segment['plain_text'] for segment in task['properties']['Name']['title'] ) or '<untitled>'
 		dueTime = datetime.fromisoformat( task['properties']['Due date']['date']['start'] )
 		
-		if datetime.now( ZoneInfo( 'America/Sao_Paulo' ) ) > dueTime:
+		if datetime.now( localTimezone ) > dueTime:
 			logging.info( f'Moving task "{taskName}" to Done.' )
 			
 			notion.pages.update(
@@ -105,7 +109,7 @@ def main( event, context ):
 		
 		# Proper support for ISO 8601 is only available in Python 3.11, so we set the timezone manually.
 		utcIsoLastEdited = task['last_edited_time'].removesuffix( 'Z' )
-		lastEdited = datetime.fromisoformat( utcIsoLastEdited ).replace( tzinfo = timezone.utc ).astimezone( ZoneInfo( 'America/Sao_Paulo' ) )
+		lastEdited = datetime.fromisoformat( utcIsoLastEdited ).replace( tzinfo = timezone.utc ).astimezone( localTimezone )
 		
 		notion.pages.update(
 			page_id = task['id'],
