@@ -25,14 +25,62 @@ def main( event, context ):
 	
 	
 	# Get database by name.
-	database = notion.search(
+	databaseId = notion.search(
 		query = 'TESTDB',
 		filter = { 'property': 'object', 'value': 'database' }
-	)['results'][0]
+	)['results'][0]['id']
 	
 	
-	# Get pages to update.
-	databaseId = database['id']
+	# Get pages due today.
+	dayEnd = datetime.now( ZoneInfo( 'America/Sao_Paulo' ) ).replace( hour = 23, minute = 59, second = 59, microsecond = 0 )
+	pages = notion.databases.query(
+		database_id = databaseId,
+		filter = {
+			'and': [
+				{
+					'property': 'Due date',
+					'date': { 'before': dayEnd.isoformat() }
+				},
+				{
+					'property': 'Status',
+					'select': { 'does_not_equal': 'Done' }
+				},
+			],
+		},
+	)['results']
+	
+	
+	# Move due tasks.
+	for page in pages:
+		pageName = ''.join( segment['plain_text'] for segment in page['properties']['Name']['title'] ) or '<untitled>'
+		dueTime = datetime.fromisoformat( page['properties']['Due date']['date']['start'] )
+		
+		if datetime.now( ZoneInfo( 'America/Sao_Paulo' ) ) > dueTime:
+			logging.info( f'Moving page "{pageName}" to Done.' )
+			
+			notion.pages.update(
+				page_id = page['id'],
+				properties = {
+					'Status': {
+						'select': { 'name': 'Done' },
+					},
+				}
+			)
+			
+		elif page['properties']['Status']['select']['name'] != 'Today':
+			logging.info( f'Moving page "{pageName}" to Today.' )
+			
+			notion.pages.update(
+				page_id = page['id'],
+				properties = {
+					'Status': {
+						'select': { 'name': 'Today' },
+					},
+				}
+			)
+	
+	
+	# Get done tasks without completed time set.
 	pages = notion.databases.query(
 		database_id = databaseId,
 		filter = {
@@ -42,7 +90,7 @@ def main( event, context ):
 					'select': { 'equals': 'Done' }
 				},
 				{
-					'property': 'Completed Time',
+					'property': 'Completed time',
 					'date': { 'is_empty': True }
 				},
 			],
@@ -50,10 +98,10 @@ def main( event, context ):
 	)['results']
 	
 	
-	# Update pages.
+	# Update completed time.
 	for page in pages:
 		pageName = ''.join( segment['plain_text'] for segment in page['properties']['Name']['title'] ) or '<untitled>'
-		logging.info( f'Updating page: {pageName}' )
+		logging.info( f'Setting completed time of page: {pageName}' )
 		
 		# Proper support for ISO 8601 is only available in Python 3.11, so we set the timezone manually.
 		utcIsoLastEdited = page['last_edited_time'].removesuffix( 'Z' )
@@ -62,7 +110,7 @@ def main( event, context ):
 		notion.pages.update(
 			page_id = page['id'],
 			properties = {
-				'Completed Time': {
+				'Completed time': {
 					'date': {
 						'start': lastEdited.isoformat(),
 					},
