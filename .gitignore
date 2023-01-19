@@ -1,0 +1,13 @@
+# 
+# Notion Lambda Automation
+# 
+# 
+# Author: Marcelo Tellier Sartori Vaz <marcelotsvaz@gmail.com>
+
+
+
+**/deployment/
+*.tfvars
+*.tfstate
+*.tfstate.*
+/env/
