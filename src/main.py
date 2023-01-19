@@ -52,7 +52,7 @@ def main( event, context ):
 	
 	# Update pages.
 	for page in pages:
-		pageName = page['properties']['Name']['title'][0]['plain_text']
+		pageName = ''.join( segment['plain_text'] for segment in page['properties']['Name']['title'] ) or '<untitled>'
 		logging.info( f'Updating page: {pageName}' )
 		
 		# Proper support for ISO 8601 is only available in Python 3.11, so we set the timezone manually.
