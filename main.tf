@@ -9,7 +9,7 @@
 # 
 # Notion Lambda Automation
 #-------------------------------------------------------------------------------
-module "notion" {
+module "notion_lambda_automation" {
 	source = "./module/lambda"
 	
 	name = local.name
@@ -19,8 +19,6 @@ module "notion" {
 	handler = "main.main"
 	environment = { notionToken = var.notion_token }
 	layers = [ aws_lambda_layer_version.dependencies.arn ]
-	
-	# policies = [ data.aws_iam_policy_document.webhook_handler ]
 }
 
 
@@ -37,21 +35,30 @@ data "archive_file" "dependencies" {
 }
 
 
-# data "aws_iam_policy_document" "webhook_handler" {
-# 	statement {
-# 		sid = "invokeJobMatcherFunction"
-		
-# 		actions = [ "lambda:InvokeFunction" ]
-		
-# 		resources = [ module.job_matcher.arn ]
-# 	}
-# }
+resource "aws_lambda_permission" "main" {
+	function_name = module.notion_lambda_automation.function_name
+	statement_id = "lambdaInvokeFunction"
+	principal = "events.amazonaws.com"
+	action = "lambda:InvokeFunction"
+	source_arn = aws_cloudwatch_event_rule.main.arn
+}
 
 
-# resource "aws_lambda_permission" "webhook_handler" {
-# 	function_name = module.webhook_handler.function_name
-# 	statement_id = "lambdaInvokeFunction"
-# 	principal = "apigateway.amazonaws.com"
-# 	action = "lambda:InvokeFunction"
-# 	source_arn = "${aws_apigatewayv2_stage.main.execution_arn}/${replace( aws_apigatewayv2_route.webhook_handler.route_key, " ", "")}"
-# }
+
+# 
+# EventBridge.
+#-------------------------------------------------------------------------------
+resource "aws_cloudwatch_event_rule" "main" {
+	name = "${local.identifier}-eventRule"
+	schedule_expression = "rate(1 minute)"
+	
+	tags = {
+		Name = "${local.name} Event Rule"
+	}
+}
+
+
+resource "aws_cloudwatch_event_target" "main" {
+	rule = aws_cloudwatch_event_rule.main.name
+	arn = module.notion_lambda_automation.arn
+}
