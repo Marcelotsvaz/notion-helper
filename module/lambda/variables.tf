@@ -8,12 +8,12 @@
 
 # Name.
 #-------------------------------------------------------------------------------
-variable "name" {
+variable name {
 	description = "Name of the function."
 	type = string
 }
 
-variable "identifier" {
+variable identifier {
 	description = "Unique identifier used in resources that need a unique name."
 	type = string
 }
@@ -21,35 +21,35 @@ variable "identifier" {
 
 # Code.
 #-------------------------------------------------------------------------------
-variable "source_dir" {
+variable source_dir {
 	description = "Path of module."
 	type = string
 }
 
-variable "handler" {
+variable handler {
 	description = "Lambda function entrypoint."
 	type = string
 }
 
-variable "timeout" {
+variable timeout {
 	description = "Lambda function timeout."
 	type = number
 	default = 30
 }
 
-variable "parameters" {
+variable parameters {
 	description = "Parameters automatically injected into module."
 	type = any
 	default = {}
 }
 
-variable "environment" {
+variable environment {
 	description = "Environment variables."
 	type = map( string )
 	default = {}
 }
 
-variable "layers" {
+variable layers {
 	description = "Set of Lambda layer ARNs."
 	type = set( string )
 	default = []
@@ -58,7 +58,7 @@ variable "layers" {
 
 # Permissions.
 #-------------------------------------------------------------------------------
-variable "policies" {
+variable policies {
 	description = "Set of policies for the Lambda Function IAM role."
 	type = set( object( { json = string } ) )
 	default = []

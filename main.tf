@@ -9,7 +9,7 @@
 # 
 # Notion Lambda Automation
 #-------------------------------------------------------------------------------
-module "notion_lambda_automation" {
+module notion_lambda_automation {
 	source = "./module/lambda"
 	
 	name = local.name
@@ -22,20 +22,20 @@ module "notion_lambda_automation" {
 }
 
 
-resource "aws_lambda_layer_version" "dependencies" {
+resource aws_lambda_layer_version dependencies {
 	layer_name = "${local.identifier}-pythonPackages"
 	filename = data.archive_file.dependencies.output_path
 }
 
 
-data "archive_file" "dependencies" {
+data archive_file dependencies {
 	type = "zip"
 	source_dir = "deployment/env/lib/python3.10/"
 	output_path = "/tmp/terraform/module.zip"
 }
 
 
-resource "aws_lambda_permission" "main" {
+resource aws_lambda_permission main {
 	function_name = module.notion_lambda_automation.function_name
 	statement_id = "lambdaInvokeFunction"
 	principal = "events.amazonaws.com"
@@ -48,7 +48,7 @@ resource "aws_lambda_permission" "main" {
 # 
 # EventBridge.
 #-------------------------------------------------------------------------------
-resource "aws_cloudwatch_event_rule" "main" {
+resource aws_cloudwatch_event_rule main {
 	name = "${local.identifier}-eventRule"
 	schedule_expression = "rate(1 minute)"
 	
@@ -58,7 +58,7 @@ resource "aws_cloudwatch_event_rule" "main" {
 }
 
 
-resource "aws_cloudwatch_event_target" "main" {
+resource aws_cloudwatch_event_target main {
 	rule = aws_cloudwatch_event_rule.main.name
 	arn = module.notion_lambda_automation.arn
 }

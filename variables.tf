@@ -6,7 +6,7 @@
 
 
 
-variable "notion_token" {
+variable notion_token {
 	description = "Notion API Token"
 	type = string
 	sensitive = true

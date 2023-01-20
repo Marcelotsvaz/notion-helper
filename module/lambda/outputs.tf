@@ -6,17 +6,17 @@
 
 
 
-output "function_name" {
+output function_name {
 	description = "Lambda Function name."
 	value = aws_lambda_function.main.function_name
 }
 
-output "arn" {
+output arn {
 	description = "Lambda Function ARN."
 	value = aws_lambda_function.main.arn
 }
 
-output "invoke_arn" {
+output invoke_arn {
 	description = "Lambda Function invoke ARN."
 	value = aws_lambda_function.main.invoke_arn
 }
