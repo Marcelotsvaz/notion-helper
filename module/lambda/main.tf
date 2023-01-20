@@ -1,5 +1,5 @@
 # 
-# Notion Lambda Automation
+# Notion Helper
 # 
 # 
 # Author: Marcelo Tellier Sartori Vaz <marcelotsvaz@gmail.com>
@@ -7,7 +7,7 @@
 
 
 # 
-# Lambda Function.
+# Lambda Function
 #-------------------------------------------------------------------------------
 resource aws_lambda_function main {
 	function_name = local.lambda_function_name
@@ -45,7 +45,7 @@ data archive_file main {
 
 
 # 
-# CloudWatch.
+# CloudWatch
 #-------------------------------------------------------------------------------
 resource aws_cloudwatch_log_group main {
 	name = "/aws/lambda/${local.lambda_function_name}"
@@ -58,16 +58,15 @@ resource aws_cloudwatch_log_group main {
 
 
 # 
-# Lambda IAM Role.
+# Lambda IAM Role
 #-------------------------------------------------------------------------------
 resource aws_iam_role main {
-	name = "${var.identifier}-lambdaRole"
+	name = var.identifier
 	assume_role_policy = data.aws_iam_policy_document.assume_role.json
 	managed_policy_arns = []
 	
 	inline_policy {
-		name = "${var.identifier}-lambdaRoleLogsPolicy"
-		
+		name = "${var.identifier}-logs"
 		policy = data.aws_iam_policy_document.logs.json
 	}
 	
@@ -75,8 +74,7 @@ resource aws_iam_role main {
 		for_each = var.policies
 		
 		content {
-			name = "${var.identifier}-lambdaRolePolicy"
-			
+			name = "${var.identifier}-policy"
 			policy = inline_policy.value.json
 		}
 	}

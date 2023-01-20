@@ -1,12 +1,13 @@
 # 
-# Notion Lambda Automation
+# Notion Helper
 # 
 # 
 # Author: Marcelo Tellier Sartori Vaz <marcelotsvaz@gmail.com>
 
 
 
-# Name.
+# 
+# Name
 #-------------------------------------------------------------------------------
 variable name {
 	description = "Name of the function."
@@ -14,15 +15,16 @@ variable name {
 }
 
 variable identifier {
-	description = "Unique identifier used in resources that need a unique name."
+	description = "Unique identifier used in resources that need an unique name."
 	type = string
 }
 
 
-# Code.
+# 
+# Code
 #-------------------------------------------------------------------------------
 variable source_dir {
-	description = "Path of module."
+	description = "Path of Python modules."
 	type = string
 }
 
@@ -56,7 +58,8 @@ variable layers {
 }
 
 
-# Permissions.
+# 
+# Permissions
 #-------------------------------------------------------------------------------
 variable policies {
 	description = "Set of policies for the Lambda Function IAM role."
@@ -66,8 +69,9 @@ variable policies {
 
 
 
-# Locals.
+# 
+# Locals
 #-------------------------------------------------------------------------------
 locals {
-	lambda_function_name = "${var.identifier}-lambda"	# Avoid cyclic dependency.
+	lambda_function_name = var.identifier	# Avoid cyclic dependency.
 }
