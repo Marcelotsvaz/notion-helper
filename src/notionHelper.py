@@ -17,6 +17,12 @@ from notion_client import Client
 
 
 def main( event, context ):
+	'''
+	Move tasks with `Due date` set to today to `Today` or `Done`.
+	Set `Completed time` property on done tasks.
+	'''
+	
+	del event, context	# Unused.
 	logging.getLogger().setLevel( logging.INFO )
 	
 	
@@ -36,7 +42,12 @@ def main( event, context ):
 	
 	
 	# Get today's tasks.
-	dayEnd = datetime.now( localTimezone ).replace( hour = 23, minute = 59, second = 59, microsecond = 0 )
+	dayEnd = datetime.now( localTimezone ).replace(
+		hour = 23,
+		minute = 59,
+		second = 59,
+		microsecond = 0,
+	)
 	tasks = notion.databases.query(
 		database_id = databaseId,
 		filter = {
@@ -56,7 +67,9 @@ def main( event, context ):
 	
 	# Move due tasks.
 	for task in tasks:
-		taskName = ''.join( segment['plain_text'] for segment in task['properties']['Name']['title'] ) or '<untitled>'
+		taskName = ''.join(
+			segment['plain_text'] for segment in task['properties']['Name']['title']
+		) or '<untitled>'
 		dueTime = datetime.fromisoformat( task['properties']['Due date']['date']['start'] )
 		
 		if datetime.now( localTimezone ) > dueTime:
@@ -104,12 +117,15 @@ def main( event, context ):
 	
 	# Update completed time.
 	for task in tasks:
-		taskName = ''.join( segment['plain_text'] for segment in task['properties']['Name']['title'] ) or '<untitled>'
+		taskName = ''.join(
+			segment['plain_text'] for segment in task['properties']['Name']['title']
+		) or '<untitled>'
 		logging.info( f'Setting completed time of task: {taskName}' )
 		
 		# Proper support for ISO 8601 is only available in Python 3.11, so we set the timezone manually.
 		utcIsoLastEdited = task['last_edited_time'].removesuffix( 'Z' )
-		lastEdited = datetime.fromisoformat( utcIsoLastEdited ).replace( tzinfo = timezone.utc ).astimezone( localTimezone )
+		lastEdited = datetime.fromisoformat( utcIsoLastEdited )
+		lastEdited = lastEdited.replace( tzinfo = timezone.utc ).astimezone( localTimezone )
 		
 		notion.pages.update(
 			page_id = task['id'],

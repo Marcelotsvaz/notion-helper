@@ -1,0 +1,40 @@
+# 
+# Notion Helper
+# 
+# 
+# Author: Marcelo Tellier Sartori Vaz <marcelotsvaz@gmail.com>
+
+
+
+[tool.pylint]
+	[tool.pylint.main]
+	init-hook = 'import sys; sys.path.append( "deployment/env/lib/python3.10/site-packages" )'
+	
+	
+	[tool.pylint.format]
+	indent-string = '	'
+	
+	
+	[tool.pylint.'messages control']
+	disable = [
+		'trailing-whitespace',
+		'missing-final-newline',
+		'missing-module-docstring',
+		'logging-fstring-interpolation',
+	]
+	
+	
+	[tool.pylint.basic]
+	module-naming-style = 'camelCase'
+	const-naming-style = 'UPPER_CASE'
+	
+	function-naming-style = 'camelCase'
+	argument-naming-style = 'camelCase'
+	variable-naming-style = 'camelCase'
+	inlinevar-naming-style = 'camelCase'
+	
+	class-naming-style = 'PascalCase'
+	class-const-naming-style = 'UPPER_CASE'
+	class-attribute-naming-style = 'camelCase'
+	method-naming-style = 'camelCase'
+	attr-naming-style = 'camelCase'
