@@ -31,7 +31,7 @@ def main( event, context ):
 	
 	
 	# Get Notion client.
-	notion = Client( auth = os.environ['notionToken'] )
+	notion = Client( auth = os.environ['notionToken'], timeout_ms = 10_000 )
 	
 	
 	# Get database by name.
