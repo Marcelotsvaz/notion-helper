@@ -17,8 +17,8 @@ resource aws_lambda_function main {
 	filename = data.archive_file.main.output_path
 	source_code_hash = data.archive_file.main.output_base64sha256
 	handler = var.handler
-	timeout = var.timeout
 	layers = var.layers
+	timeout = var.timeout
 	
 	environment {
 		variables = merge( var.environment, {
