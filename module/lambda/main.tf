@@ -88,13 +88,11 @@ resource aws_iam_role main {
 data aws_iam_policy_document assume_role {
 	statement {
 		sid = "lambdaAssumeRole"
-		
+		actions = [ "sts:AssumeRole" ]
 		principals {
 			type = "Service"
 			identifiers = [ "lambda.amazonaws.com" ]
 		}
-		
-		actions = [ "sts:AssumeRole" ]
 	}
 }
 
@@ -102,12 +100,10 @@ data aws_iam_policy_document assume_role {
 data aws_iam_policy_document logs {
 	statement {
 		sid = "putCloudwatchLogs"
-		
 		actions = [
 			"logs:CreateLogStream",
 			"logs:PutLogEvents",
 		]
-		
 		resources = [ "${aws_cloudwatch_log_group.main.arn}:*" ]
 	}
 }
