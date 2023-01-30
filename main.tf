@@ -16,7 +16,7 @@ module notion_helper {
 	name = local.name
 	identifier = local.identifier
 	
-	source_dir = "src"
+	source_dir = "files/src"
 	handler = "notionHelper.main"
 	environment = { notionToken = var.notion_token }
 	layers = [ aws_lambda_layer_version.python_packages.arn ]
