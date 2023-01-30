@@ -10,7 +10,8 @@
 # Notion Helper
 #-------------------------------------------------------------------------------
 module notion_helper {
-	source = "./module/lambda"
+	source = "gitlab.com/marcelotsvaz/lambda/aws"
+	version = "~> 0.2.0"
 	
 	name = local.name
 	identifier = local.identifier
