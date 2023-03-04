@@ -9,6 +9,7 @@
 import logging
 import os
 
+from typing import Any
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
@@ -16,7 +17,7 @@ from notion_client import Client
 
 
 
-def main( event, context ):
+def main( event: dict[str, Any], context: Any ) -> None:
 	'''
 	Move tasks with `Due date` set to today to `Today` or `Done`.
 	Set `Completed time` property on done tasks.
@@ -35,7 +36,7 @@ def main( event, context ):
 	
 	
 	# Get database by name.
-	databaseId = notion.search(
+	databaseId: str = notion.search(	# pyright: ignore [reportGeneralTypeIssues]
 		query = 'Tasks',
 		filter = { 'property': 'object', 'value': 'database' }
 	)['results'][0]['id']
@@ -48,7 +49,7 @@ def main( event, context ):
 		second = 59,
 		microsecond = 0,
 	)
-	tasks = notion.databases.query(
+	tasks: list[dict[str, Any]] = notion.databases.query(	# pyright: ignore [reportGeneralTypeIssues]
 		database_id = databaseId,
 		filter = {
 			'and': [
@@ -98,7 +99,7 @@ def main( event, context ):
 	
 	
 	# Get done tasks without completed time set.
-	tasks = notion.databases.query(
+	tasks: list[dict[str, Any]] = notion.databases.query(	# pyright: ignore [reportGeneralTypeIssues]
 		database_id = databaseId,
 		filter = {
 			'and': [

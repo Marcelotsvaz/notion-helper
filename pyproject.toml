@@ -6,6 +6,12 @@
 
 
 
+[tool.pyright]
+typeCheckingMode = 'strict'
+reportUnnecessaryTypeIgnoreComment = true
+
+
+
 [tool.pylint]
 	[tool.pylint.main]
 	init-hook = 'import sys; sys.path.append( "deployment/env/lib/python3.10/site-packages" )'
