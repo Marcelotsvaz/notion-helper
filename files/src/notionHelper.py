@@ -17,6 +17,11 @@ from notion_client import Client
 
 
 
+# Global variables.
+localTimezone = ZoneInfo( 'America/Sao_Paulo' )
+
+
+
 def main( event: dict[str, Any], context: Any ) -> None:
 	'''
 	Move tasks with `Due date` set to today to `Today` or `Done`.
@@ -25,10 +30,6 @@ def main( event: dict[str, Any], context: Any ) -> None:
 	
 	del event, context	# Unused.
 	logging.getLogger().setLevel( logging.INFO )
-	
-	
-	# Variables.
-	localTimezone = ZoneInfo( 'America/Sao_Paulo' )
 	
 	
 	# Get Notion client.
@@ -71,7 +72,7 @@ def main( event: dict[str, Any], context: Any ) -> None:
 		taskName = ''.join(
 			segment['plain_text'] for segment in task['properties']['Name']['title']
 		) or '<untitled>'
-		dueTime = datetime.fromisoformat( task['properties']['Due date']['date']['start'] )
+		dueTime = parseDatetime( task['properties']['Due date']['date']['start'] )
 		
 		if datetime.now( localTimezone ) > dueTime:
 			logging.info( f'Moving task "{taskName}" to Done.' )
@@ -121,12 +122,8 @@ def main( event: dict[str, Any], context: Any ) -> None:
 		taskName = ''.join(
 			segment['plain_text'] for segment in task['properties']['Name']['title']
 		) or '<untitled>'
+		lastEdited = parseDatetime( task['last_edited_time'] )
 		logging.info( f'Setting completed time of task: {taskName}' )
-		
-		# Proper support for ISO 8601 is only available in Python 3.11, so we set the timezone manually.
-		utcIsoLastEdited = task['last_edited_time'].removesuffix( 'Z' )
-		lastEdited = datetime.fromisoformat( utcIsoLastEdited )
-		lastEdited = lastEdited.replace( tzinfo = timezone.utc ).astimezone( localTimezone )
 		
 		notion.pages.update(
 			page_id = task['id'],
@@ -138,3 +135,23 @@ def main( event: dict[str, Any], context: Any ) -> None:
 				},
 			}
 		)
+
+
+
+def parseDatetime( isoDate: str ) -> datetime:
+	'''
+	Parse a date in ISO 8601 format to a datetime object.
+	'''
+	
+	date = datetime.fromisoformat( isoDate.removesuffix( 'Z' ) )
+	
+	if isoDate.endswith( 'Z' ):
+		# Proper support for ISO 8601 is only available in Python 3.11, so we set the timezone
+		# manually in this case.
+		date = date.replace( tzinfo = timezone.utc ).astimezone( localTimezone )
+	
+	if date.tzinfo is None:
+		# Notion dates without time are offset-naive, so consider them to be in local time.
+		date = date.replace( tzinfo = localTimezone )
+	
+	return date
