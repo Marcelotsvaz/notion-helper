@@ -36,10 +36,9 @@ def main( event: dict[str, Any], context: Any ) -> None:
 	notion = Client( auth = os.environ['notionToken'], timeout_ms = 10_000 )
 	
 	
-	# Get database by name.
+	# Get database ID, integration should have access to only one database.
 	databaseId: str = notion.search(	# pyright: ignore [reportGeneralTypeIssues]
-		query = 'Tasks',
-		filter = { 'property': 'object', 'value': 'database' }
+		filter = { 'property': 'object', 'value': 'database' },
 	)['results'][0]['id']
 	
 	

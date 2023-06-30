@@ -31,7 +31,7 @@ resource aws_lambda_layer_version python_packages {
 
 data archive_file python_packages {
 	type = "zip"
-	source_dir = "deployment/env/lib/python3.10/"
+	source_dir = "deployment/env/lib/python3.11/"
 	output_path = "/tmp/terraform/python_packages.zip"
 }
 
