@@ -97,7 +97,10 @@ def main( event: dict[str, Any], context: Any ) -> None:
 				},
 			)
 			
-		elif task['properties']['Status']['select']['name'] != 'Today':
+			continue
+		
+		taskStatus = task['properties']['Status']['select']
+		if not taskStatus or taskStatus['name'] != 'Today':
 			logging.info( f'Moving task "{taskName}" to Today.' )
 			
 			notion.pages.update(
@@ -108,6 +111,8 @@ def main( event: dict[str, Any], context: Any ) -> None:
 					},
 				},
 			)
+			
+			continue
 	
 	
 	# Get done tasks without completed time set.
