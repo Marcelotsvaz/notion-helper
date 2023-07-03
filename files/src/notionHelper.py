@@ -81,9 +81,11 @@ def main( event: dict[str, Any], context: Any ) -> None:
 		taskName = ''.join(
 			segment['plain_text'] for segment in task['properties']['Name']['title']
 		) or '<untitled>'
-		dueTime = parseDatetime( task['properties']['Due date']['date']['start'] )
+		endTime = task['properties']['Due date']['date']
+		endTime = endTime['end'] or endTime['start']
+		endTime = parseDatetime( endTime )
 		
-		if datetime.now( localTimezone ) > dueTime:
+		if datetime.now( localTimezone ) > endTime:
 			logging.info( f'Moving task "{taskName}" to Done.' )
 			
 			notion.pages.update(
