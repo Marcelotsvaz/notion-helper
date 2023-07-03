@@ -42,28 +42,38 @@ def main( event: dict[str, Any], context: Any ) -> None:
 	)['results'][0]['id']
 	
 	
-	# Get today's tasks.
-	dayEnd = datetime.now( localTimezone ).replace(
-		hour = 23,
-		minute = 59,
-		second = 59,
+	# Get tasks scheduled for today.
+	now = datetime.now( localTimezone )
+	tomorrowStart = now.replace(
+		day = now.day + 1,
+		hour = 0,
+		minute = 0,
+		second = 0,
 		microsecond = 0,
 	)
+	
 	tasks: list[dict[str, Any]] = notion.databases.query(	# pyright: ignore [reportGeneralTypeIssues]
 		database_id = databaseId,
 		filter = {
 			'and': [
 				{
 					'property': 'Due date',
-					'date': { 'before': dayEnd.isoformat() }
+					'date': { 'before': tomorrowStart.isoformat() },
 				},
 				{
 					'property': 'Status',
-					'select': { 'does_not_equal': 'Done' }
+					'select': { 'does_not_equal': 'Done' },
 				},
 			],
 		},
 	)['results']
+	
+	# Filter out tasks wrongly included due to Notion handing date properties without time
+	# information as UTC instead of local time.
+	tasks = [
+		task for task in tasks
+		if parseDatetime( task['properties']['Due date']['date']['start'] ) < tomorrowStart
+	]
 	
 	
 	# Move due tasks.
@@ -82,7 +92,7 @@ def main( event: dict[str, Any], context: Any ) -> None:
 					'Status': {
 						'select': { 'name': 'Done' },
 					},
-				}
+				},
 			)
 			
 		elif task['properties']['Status']['select']['name'] != 'Today':
@@ -94,7 +104,7 @@ def main( event: dict[str, Any], context: Any ) -> None:
 					'Status': {
 						'select': { 'name': 'Today' },
 					},
-				}
+				},
 			)
 	
 	
@@ -105,11 +115,11 @@ def main( event: dict[str, Any], context: Any ) -> None:
 			'and': [
 				{
 					'property': 'Status',
-					'select': { 'equals': 'Done' }
+					'select': { 'equals': 'Done' },
 				},
 				{
 					'property': 'Completed time',
-					'date': { 'is_empty': True }
+					'date': { 'is_empty': True },
 				},
 			],
 		},
@@ -132,7 +142,7 @@ def main( event: dict[str, Any], context: Any ) -> None:
 						'start': lastEdited.isoformat(),
 					},
 				},
-			}
+			},
 		)
 
 
