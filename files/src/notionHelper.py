@@ -43,15 +43,7 @@ def main( event: dict[str, Any], context: Any ) -> None:
 	
 	
 	# Get tasks scheduled for today.
-	now = datetime.now( localTimezone )
-	tomorrowStart = now.replace(
-		day = now.day + 1,
-		hour = 0,
-		minute = 0,
-		second = 0,
-		microsecond = 0,
-	)
-	
+	tomorrowStart = nextDayStart( datetime.now( localTimezone ) )
 	tasks: list[dict[str, Any]] = notion.databases.query(	# pyright: ignore [reportGeneralTypeIssues]
 		database_id = databaseId,
 		filter = {
@@ -81,11 +73,15 @@ def main( event: dict[str, Any], context: Any ) -> None:
 		taskName = ''.join(
 			segment['plain_text'] for segment in task['properties']['Name']['title']
 		) or '<untitled>'
-		endTime = task['properties']['Due date']['date']
-		endTime = endTime['end'] or endTime['start']
-		endTime = parseDatetime( endTime )
 		
-		if datetime.now( localTimezone ) > endTime:
+		endTime = task['properties']['Due date']['date']
+		if endTime['end']:
+			endTime = parseDatetime( endTime['end'] )
+		else:
+			# Whole day tasks.
+			endTime = nextDayStart( parseDatetime( endTime['start'] ) )
+		
+		if datetime.now( localTimezone ) >= endTime:
 			logging.info( f'Moving task "{taskName}" to Done.' )
 			
 			notion.pages.update(
@@ -151,6 +147,21 @@ def main( event: dict[str, Any], context: Any ) -> None:
 				},
 			},
 		)
+
+
+
+def nextDayStart( date: datetime ) -> datetime:
+	'''
+	Return earliest moment of the next day.
+	'''
+	
+	return date.replace(
+		day = date.day + 1,
+		hour = 0,
+		minute = 0,
+		second = 0,
+		microsecond = 0,
+	)
 
 
 
