@@ -1,0 +1,11 @@
+{
+	extends: [
+		'config:best-practices',
+		'marcelotsvaz/renovate-runner:default.json5/default',
+		'marcelotsvaz/renovate-runner:default.json5/addLabels',
+		'marcelotsvaz/renovate-runner:default.json5/pinAllDependencies',
+		'marcelotsvaz/renovate-runner:default.json5/groupByUpdateTypeAndManager',
+		'marcelotsvaz/renovate-runner:default.json5/prettyUpdateType',
+		'marcelotsvaz/renovate-runner:default.json5/prettyDepType',
+	],
+}
